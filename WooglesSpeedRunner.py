@@ -30,7 +30,7 @@ def check_every_n_seconds(n=5):
             end_time = datetime.strptime(game_info['last_update'], "%Y-%m-%dT%H:%M:%S.%f%z")
             if (start_time - run_start_time).total_seconds() >= 0: #make sure game started at same time or after run started IMPORTANT FOR TESTING
                 print('New game completed')
-                if game_info['time_control_name'] == str(values['-TIME-']).lower() and game_info['game_request']['lexicon'] == str(values['-LEXICON-']): #must be playing the right time setting and lexicon
+                if game_info['time_control_name'] == str(values['-TIME-']).lower() and game_info['game_request']['lexicon'] == str(values['-LEXICON-']) and game_info['game_request']['challenge_rule'] == str(values['-CHALLENGE-']): #must be playing the right time setting and lexicon
                     run_old_time = run_total_time
                     run_total_time = (end_time - run_start_time).total_seconds()
                     run_split_time = run_total_time - run_old_time
@@ -63,7 +63,7 @@ def check_every_n_seconds(n=5):
                         window['-SPLITS-' + sg.WRITE_ONLY_KEY].print('Wrong opponent')
                     window['-STATS-'].update(f"Wins: {len(won_games)}/{len(games)} Spread: %s{spread}"%("+" if spread >= 0 else ""))
                 else:
-                    window['-SPLITS-' + sg.WRITE_ONLY_KEY].print('Wrong time setting or lexicon')
+                    window['-SPLITS-' + sg.WRITE_ONLY_KEY].print('Wrong time setting, lexicon or challenge rule')
             else:
                 print('No new game completed')
         time.sleep(n - ((datetime.now(timezone.utc) - run_start_time).total_seconds() % n)) #check every 5 seconds
@@ -77,7 +77,7 @@ def check_every_n_seconds(n=5):
             "startedAt": run_start_time.isoformat(),
             "endedAt": end_time.isoformat(),
             "game": {"longname": "Woogles.io"},
-            "category": {"longname": f"{str(values['-LEXICON-'])} {str(values['-BOT-'])} {str(values['-TIME-'])} - Run to {str(values['-WINS-'])} win%s"%("s" if int(values['-WINS-']) > 1 else "")},
+            "category": {"longname": f"{str(values['-LEXICON-'])} {str(values['-BOT-'])} {str(values['-TIME-'])} {str(values['-CHALLENGE-'])} - Run to {str(values['-WINS-'])} win%s"%("s" if int(values['-WINS-']) > 1 else "")},
             "segments": segments
         }
         with open(f"run_{run_start_time.strftime('%m_%d_%Y_%H_%M_%S')}.json", 'w', encoding='utf-8') as f:
@@ -88,6 +88,7 @@ layout = [[sg.Column([[sg.Text('Woogles Username')], [sg.InputText(key='-ID-', s
     [sg.Text('Time control'), sg.Combo(['Ultrablitz', 'Blitz', 'Rapid', 'Regular'], default_value='Ultrablitz',key='-TIME-')],
     [sg.Text('Bot'), sg.Combo(['HastyBot', 'STEEBot', 'BetterBot', 'BasicBot', 'BeginnerBot'], default_value='HastyBot', key='-BOT-')],
     [sg.Text('Lexicon'), sg.Combo(['CSW19', 'NWL20', 'ECWL', 'RD28', 'FRA20', 'NSF21'], default_value='CSW19', key='-LEXICON-', size=(8,1))],
+    [sg.Text('Challenge Rule'), sg.Combo(['FIVE_POINT', 'TEN_POINT', 'DOUBLE', 'SINGLE', 'VOID', 'TRIPLE'], default_value='FIVE_POINT', key='-CHALLENGE-', size=(12,1))],
     [sg.Text('Number of wins'), sg.InputText(key='-WINS-', size=(4,1), enable_events=True, default_text='5')],
     [sg.Button('Start run!')]]), 
     sg.Column([[sg.Image(key='-IMAGE-', filename="macondog.png", size=(200,100))]])],

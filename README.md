@@ -5,7 +5,7 @@ A tool that facilitates Woogles bot "speed runs" - i.e. first to reach x wins ag
 
 	1. Make sure you have macondog.png downloaded in the same directory.
 	
-	2. Key in your Woogles username, select the correct time control and bot for the run, and key in the number of wins to achieve.
+	2. Key in your Woogles username, select the correct time control, bot, lexicon and challenge rule for the run, and key in the number of wins to achieve.
 	
 	3. Click "Start run!"
 	
