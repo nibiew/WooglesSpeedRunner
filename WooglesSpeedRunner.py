@@ -44,7 +44,7 @@ def check_every_n_seconds(n=5):
                         if game_info['winner'] == 1: #player won; write split
                             print('game won')
                             won_games.append(game_id)
-                            segments.append({"name": f"Win {len(won_games)}", "endedAt": {"realtimeMS": run_split_time*1000, "gametimeMS": game_split_time*1000}})
+                            segments.append({"name": f"Win {len(won_games)}", "endedAt": {"realtimeMS": run_total_time*1000, "gametimeMS": game_total_time*1000}})
                             window['-SPLITS-' + sg.WRITE_ONLY_KEY].print(f"Win {len(won_games)}")
                             sg.cprint(f">Game time: {str(timedelta(seconds=game_split_time))}\n>Total: {str(timedelta(seconds=game_total_time))}\n>Run time: {str(timedelta(seconds=run_split_time))}\n>Total: {str(timedelta(seconds=run_total_time))}", text_color="grey")
                     elif game_info['players'][1]['nickname'] == str(values['-BOT-']): #if the bot is the second player
