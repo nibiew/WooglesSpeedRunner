@@ -28,7 +28,7 @@ def check_every_n_seconds(n=5):
         else: #new game completed
             start_time = datetime.strptime(game_info['created_at'], "%Y-%m-%dT%H:%M:%S.%f%z")
             end_time = datetime.strptime(game_info['last_update'], "%Y-%m-%dT%H:%M:%S.%f%z")
-            if (start_time - run_start_time).total_seconds() < 0: #make sure game started at same time or after run started IMPORTANT FOR TESTING
+            if (start_time - run_start_time).total_seconds() >= 0: #make sure game started at same time or after run started IMPORTANT FOR TESTING
                 print('New game completed')
                 if game_info['time_control_name'] == str(values['-TIME-']).lower(): #must be playing the right time setting
                     run_old_time = run_total_time
