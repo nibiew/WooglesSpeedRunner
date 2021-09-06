@@ -13,8 +13,10 @@ def check_every_n_seconds(n=5):
     run_total_time = 0
     games = []
     won_games = []
+    segments = []
     wins_required = int(values['-WINS-'])
     spread = 0
+    end_time = run_start_time #baseline
     while len(won_games) < wins_required:
         print('New check')
         r = client.post(URL, json = headers)
@@ -26,7 +28,7 @@ def check_every_n_seconds(n=5):
         else: #new game completed
             start_time = datetime.strptime(game_info['created_at'], "%Y-%m-%dT%H:%M:%S.%f%z")
             end_time = datetime.strptime(game_info['last_update'], "%Y-%m-%dT%H:%M:%S.%f%z")
-            if (start_time - run_start_time).total_seconds() >= 0: #make sure game started at same time or after run started
+            if (start_time - run_start_time).total_seconds() < 0: #make sure game started at same time or after run started IMPORTANT FOR TESTING
                 print('New game completed')
                 if game_info['time_control_name'] == str(values['-TIME-']).lower(): #must be playing the right time setting
                     run_old_time = run_total_time
@@ -42,6 +44,7 @@ def check_every_n_seconds(n=5):
                         if game_info['winner'] == 1: #player won; write split
                             print('game won')
                             won_games.append(game_id)
+                            segments.append({"name": f"Win {len(won_games)}", "endedAt": {"realtimeMS": run_split_time*1000, "gametimeMS": game_split_time*1000}})
                             window['-SPLITS-' + sg.WRITE_ONLY_KEY].print(f"Win {len(won_games)}")
                             sg.cprint(f">Game time: {str(timedelta(seconds=game_split_time))}\n>Total: {str(timedelta(seconds=game_total_time))}\n>Run time: {str(timedelta(seconds=run_split_time))}\n>Total: {str(timedelta(seconds=run_total_time))}", text_color="grey")
                     elif game_info['players'][1]['nickname'] == str(values['-BOT-']): #if the bot is the second player
@@ -53,20 +56,32 @@ def check_every_n_seconds(n=5):
                         if game_info['winner'] == 0: #player won; write split
                             print('game won')
                             won_games.append(game_id)
+                            segments.append({"name": f"Win {len(won_games)}", "endedAt": {"realtimeMS": run_split_time*1000, "gametimeMS": game_split_time*1000}})
                             window['-SPLITS-' + sg.WRITE_ONLY_KEY].print(f"Win {len(won_games)}")
                             sg.cprint(f">Game time: {str(timedelta(seconds=game_split_time))}\n>Total: {str(timedelta(seconds=game_total_time))}\n>Run time: {str(timedelta(seconds=run_split_time))}\n>Total: {str(timedelta(seconds=run_total_time))}", text_color="grey")
                     else:
-                        window['-SPLITS-' + sg.WRITE_ONLY_KEY].print('Wrong time setting')
+                        window['-SPLITS-' + sg.WRITE_ONLY_KEY].print('Wrong opponent')
                     window['-STATS-'].update(f"Wins: {len(won_games)}/{len(games)} Spread: %s{spread}"%("+" if spread >= 0 else ""))
                 else:
-                    window['-SPLITS-' + sg.WRITE_ONLY_KEY].print('Wrong opponent')
+                    window['-SPLITS-' + sg.WRITE_ONLY_KEY].print('Wrong time setting')
             else:
                 print('No new game completed')
         time.sleep(n - ((datetime.now(timezone.utc) - run_start_time).total_seconds() % n)) #check every 5 seconds
     else: #executes at the end of the run
         started=False
-        window['-SPLITS-' + sg.WRITE_ONLY_KEY].print("Run has ended!")
-        window['-RUN-'].update('Run has ended!', text_color = 'black')
+        window['-SPLITS-' + sg.WRITE_ONLY_KEY].print(f"Run is complete! Saved to run_{run_start_time.strftime('%m_%d_%Y_%H_%M_%S')}.json")
+        window['-RUN-'].update('Run is complete!', text_color = 'white')
+        data = { "_schemaVersion": "v1.0.1", 
+            "timer": { "shortname": "woogles", "longname":  "Woogles Speedrunner","version":   "v1.0.0", "website": "https://github.com/nibiew/WooglesSpeedRunner" },
+            "videoURL": "",
+            "startedAt": run_start_time.isoformat(),
+            "endedAt": end_time.isoformat(),
+            "game": {"longname": "Woogles.io"},
+            "category": {"longname": f"{str(values['-BOT-'])} {str(values['-TIME-'])} - Run to {str(values['-WINS-'])} win%s"%("s" if int(values['-WINS-']) > 1 else "")},
+            "segments": segments
+        }
+        with open(f"run_{run_start_time.strftime('%m_%d_%Y_%H_%M_%S')}.json", 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
 
 # Define the window's contents
 layout = [[sg.Column([[sg.Text('Woogles Username')], [sg.InputText(key='-ID-', size=(30,1))],

@@ -3,9 +3,13 @@ A tool that facilitates Woogles bot "speed runs" - i.e. first to reach x wins ag
 
 ## Instructions
 
-	1. Key in your Woogles username, select the correct time control and bot for the run, and key in the number of wins to achieve.
+	1. Make sure you have macondog.png downloaded in the same directory.
 	
-	2. Click "Start run!"
+	2. Key in your Woogles username, select the correct time control and bot for the run, and key in the number of wins to achieve.
+	
+	3. Click "Start run!"
+	
+	4. When you have completed the run, a .json file will be created in the same directory with the filename "run_<start_time>.json". This follows the Splits.io Exchange Format and can be uploaded to https://splits.io/.
 
 ## General Notes
 
