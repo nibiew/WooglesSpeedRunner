@@ -1,0 +1,5 @@
+beginnerbot
+basicbot
+betterbot
+steebot
+hastybot
